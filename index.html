@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Protocolo Agonía PAC/CS · v3.3</title>
+<style>
+:root[data-theme="dark"]{
+  --bg:#0d0f18;--card:#181a28;--card2:#20223099;
+  --b1:rgba(255,255,255,0.08);--b2:rgba(255,255,255,0.15);
+  --t1:#e8eaf2;--t2:#7a8299;--t3:#3a4060;
+  --dt:#ff7070;--db:#1f0e0e;--dbb:#5c2020;
+  --wt:#ffb347;--wb:#1f1600;--wbb:#5c4000;
+  --st:#4ec992;--sb:#0c1f15;--sbb:#1a5035;
+  --it:#60aaf0;--ib:#0c1620;--ibb:#1a3a5c;
+  --nav:#0d0f18;--tabinact:#3a4060;--tabact:#e8eaf2;
+}
+:root[data-theme="light"]{
+  --bg:#f4f5fa;--card:#ffffff;--card2:#eef0f8;
+  --b1:rgba(0,0,0,0.08);--b2:rgba(0,0,0,0.15);
+  --t1:#1a1c2e;--t2:#5a6285;--t3:#b0b8d0;
+  --dt:#b82020;--db:#fff0f0;--dbb:#f0a0a0;
+  --wt:#7a5200;--wb:#fffbe8;--wbb:#f0d060;
+  --st:#1a6e40;--sb:#f0fff7;--sbb:#80d0a8;
+  --it:#1050a0;--ib:#f0f6ff;--ibb:#80b8f0;
+  --nav:#f4f5fa;--tabinact:#9aa0c0;--tabact:#1a1c2e;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--t1);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.6;min-height:100vh}
+.wrap{max-width:800px;margin:0 auto}
+
+/* HEADER */
+.hdr{padding:1.1rem 1rem .9rem;border-bottom:1px solid var(--b1);display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.hdr-title{font-size:17px;font-weight:700;color:var(--t1);letter-spacing:-.4px}
+.hdr-sub{font-size:12px;color:var(--t2);margin-top:3px}
+.hdr-badges{margin-top:6px;display:flex;flex-wrap:nowrap;gap:4px}
+.bdg{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;border:1px solid}
+.bdg-r{background:var(--db);color:var(--dt);border-color:var(--dbb)}
+.bdg-a{background:var(--wb);color:var(--wt);border-color:var(--wbb)}
+.bdg-b{background:var(--ib);color:var(--it);border-color:var(--ibb)}
+.theme-btn{background:var(--card);border:1px solid var(--b2);color:var(--t2);font-size:11px;padding:5px 10px;border-radius:6px;cursor:pointer;white-space:nowrap;flex-shrink:0;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.theme-btn:hover{color:var(--t1)}
+
+/* TABS */
+.tabs{display:flex;overflow-x:auto;border-bottom:1px solid var(--b1);background:var(--nav);position:sticky;top:0;z-index:20;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex-shrink:0;padding:12px 16px;font-size:13px;font-weight:600;color:var(--tabinact);cursor:pointer;border:none;border-bottom:2px solid transparent;background:none;white-space:nowrap;transition:color .15s;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.tab.act{color:var(--tabact);border-bottom-color:var(--tabact)}
+.tab:hover{color:var(--t1)}
+
+/* SECTIONS */
+.sec{display:none;padding:1.25rem 1rem 2rem}
+.sec.act{display:block}
+.sec-intro{font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:1.25rem}
+.sec-intro strong{font-weight:600;color:var(--t1)}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--b1);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem}
+.card-r{background:var(--db);border-color:var(--dbb)}
+.card-a{background:var(--wb);border-color:var(--wbb)}
+.card-g{background:var(--sb);border-color:var(--sbb)}
+.card-b{background:var(--ib);border-color:var(--ibb)}
+.card-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.9px;color:var(--t2);margin-bottom:.8rem}
+.ct-r{color:var(--dt)}.ct-a{color:var(--wt)}.ct-g{color:var(--st)}.ct-b{color:var(--it)}
+
+/* ALERTS */
+.al{border-radius:8px;padding:.75rem 1rem;margin-bottom:.75rem;border-left:3px solid;font-size:13px;line-height:1.65;color:var(--t1)}
+.al:last-child{margin-bottom:0}
+.al-r{background:var(--db);border-color:var(--dt)}.al-a{background:var(--wb);border-color:var(--wt)}
+.al-g{background:var(--sb);border-color:var(--st)}.al-b{background:var(--ib);border-color:var(--it)}
+.al strong{font-weight:700}
+.lbl{font-weight:700;margin-right:4px}
+.al-r .lbl{color:var(--dt)}.al-a .lbl{color:var(--wt)}.al-g .lbl{color:var(--st)}.al-b .lbl{color:var(--it)}
+
+/* DRUG ROWS */
+.drow{display:flex;justify-content:space-between;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--b1);gap:12px}
+.drow:last-child{border-bottom:none;padding-bottom:0}
+.dname{font-size:14px;font-weight:600;color:var(--t1)}
+.ddetail{font-size:12px;color:var(--t2);margin-top:2px;line-height:1.5}
+.dqty{font-size:13px;font-weight:700;color:var(--t1);text-align:right;white-space:nowrap;padding-top:2px}
+
+/* MIX TABLE */
+.mtbl{width:100%;border-collapse:collapse}
+.mtbl td{padding:8px 6px;font-size:13px;border-bottom:1px solid var(--b1)}
+.mtbl tr:last-child td{border-bottom:none}
+.mdrug{font-weight:600;color:var(--t1)}
+.mvol{font-weight:700;color:var(--t1);text-align:center;width:70px}
+.mdose{color:var(--t2)}
+.mtotal{margin-top:10px;padding-top:10px;border-top:2px solid var(--b2);display:flex;justify-content:space-between;align-items:center}
+.mtlabel{font-size:13px;font-weight:600;color:var(--t1)}
+.mtval{font-size:16px;font-weight:700;color:var(--t1)}
+
+/* STEPS */
+.step{display:flex;gap:12px;margin-bottom:1rem}
+.step:last-child{margin-bottom:0}
+.snum{width:26px;height:26px;border-radius:50%;background:var(--t1);color:var(--bg);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.stitle{font-size:14px;font-weight:600;color:var(--t1);margin-bottom:3px}
+.sdesc{font-size:13px;color:var(--t2);line-height:1.65}
+
+/* DATA TABLE */
+.dtbl{width:100%;border-collapse:collapse;font-size:13px}
+.dtbl th{font-weight:700;text-align:left;padding:8px 10px;color:var(--t2);border-bottom:1px solid var(--b2);font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+.dtbl td{padding:9px 10px;border-bottom:1px solid var(--b1);color:var(--t1);vertical-align:top;line-height:1.5}
+.dtbl tr:last-child td{border-bottom:none}
+.tc{text-align:center}.tb{font-weight:700}
+.tg{color:var(--st);font-weight:700}.ta{color:var(--wt);font-weight:700}.tr2{color:var(--dt);font-weight:700}
+
+/* ESCALADA */
+.esc{display:flex;gap:10px;margin-bottom:1rem}
+.esc:last-child{margin-bottom:0}
+.enum{width:22px;height:22px;border-radius:50%;background:var(--db);color:var(--dt);border:1px solid var(--dbb);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.etitle{font-size:13px;font-weight:700;color:var(--t1);margin-bottom:2px}
+.edesc{font-size:12px;color:var(--t2);line-height:1.65}
+
+/* COPY BLOCK */
+.cblock{background:var(--card2);border:1px solid var(--b1);border-radius:8px;padding:.75rem 1rem;font-size:12px;color:var(--t1);line-height:1.7;font-style:italic;margin-top:6px}
+
+/* LEGAL ITEMS */
+.litem{padding:10px 0;border-bottom:1px solid var(--b1)}
+.litem:last-child{border-bottom:none;padding-bottom:0}
+.llabel{font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px}
+
+/* CHECKLIST */
+.chk{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--b1);cursor:pointer;user-select:none}
+.chk:last-child{border-bottom:none}
+.chk-box{width:20px;height:20px;border-radius:5px;border:2px solid var(--b2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.chk.done .chk-box{background:var(--st);border-color:var(--st)}
+.chk.done .chk-box::after{content:'✓';color:#fff;font-size:12px;font-weight:700}
+.chk.done .chk-label{color:var(--t2);text-decoration:line-through}
+.chk-label{font-size:13px;color:var(--t1);line-height:1.4}
+.chk-badge{font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;background:var(--db);color:var(--dt);border:1px solid var(--dbb);margin-left:auto;flex-shrink:0}
+
+/* RESET BUTTON */
+.btn-reset{background:var(--card);border:1px solid var(--b2);color:var(--t2);font-size:12px;font-weight:600;padding:6px 14px;border-radius:8px;cursor:pointer;margin-bottom:12px;display:inline-flex;align-items:center;gap:6px;transition:color .15s}
+.btn-reset:hover{color:var(--t1)}
+
+/* HOJA DE RUTA */
+.roadmap{background:var(--card);border:2px solid var(--it);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem}
+.roadmap-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.9px;color:var(--it);margin-bottom:.85rem}
+.rm-steps{display:flex;flex-direction:column;gap:.4rem}
+.rm-step{display:flex;align-items:flex-start;gap:.75rem;padding:.55rem .75rem;border-radius:8px}
+.rm-step-key{background:var(--db);border:1px solid var(--dbb)}
+.rm-num{width:24px;height:24px;border-radius:50%;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;background:var(--card2);color:var(--t2);border:1px solid var(--b2)}
+.rm-step-key .rm-num{background:var(--dt);color:#fff;border-color:var(--dt)}
+.rm-text{font-size:13px;color:var(--t2);line-height:1.45}
+.rm-step-key .rm-text{color:var(--t1)}
+.rm-key-label{display:inline-block;font-size:14px;font-weight:700;color:var(--dt);margin-right:4px}
+
+.rm-step-link{cursor:pointer;transition:background .12s}
+.rm-step-link:hover{background:var(--card2)}
+.rm-step-key.rm-step-link:hover{filter:brightness(.96)}
+.rm-arrow{font-size:11px;color:var(--it);font-weight:700;white-space:nowrap;margin-left:4px;opacity:.8}
+.rm-step-key .rm-arrow{color:var(--dt)}
+.divider{background:var(--b1);margin:1rem 0;height:1px;border:none}
+.prose{font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:.75rem}
+.prose:last-child{margin-bottom:0}
+.prose strong{font-weight:600;color:var(--t1)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+@media(max-width:480px){.two-col{grid-template-columns:1fr}}
+.label-pill{display:inline-block;font-size:11px;padding:2px 9px;border-radius:20px;border:1px solid var(--b2);color:var(--t2);margin:2px 3px 2px 0;background:var(--card)}
+.note{font-size:12px;color:var(--t3);margin-top:.5rem;line-height:1.5}
+.footer{padding:1.5rem 1rem;text-align:center;font-size:11px;color:var(--t3);border-top:1px solid var(--b1);margin-top:1rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- HEADER -->
+<div class="hdr">
+  <div>
+    <div class="hdr-title">Protocolo de agonía — PAC domiciliario</div>
+    <div class="hdr-sub">Vía SC exclusiva · Sin elastómero/bomba</div>
+    <div class="hdr-badges">
+      <span class="bdg bdg-r">Urgencia vital</span>
+      <span class="bdg bdg-a">Solo vía SC</span>
+    </div>
+  </div>
+  <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙 Oscuro</button>
+</div>
+
+<!-- TABS -->
+<div class="tabs" id="tabs">
+  <button class="tab act" onclick="showTab(0)">Inicio</button>
+  <button class="tab" onclick="showTab(1)">Acceso SC</button>
+  <button class="tab" onclick="showTab(2)">Evaluación</button>
+  <button class="tab" onclick="showTab(3)">Dosis carga</button>
+  <button class="tab" onclick="showTab(4)">Kit familia</button>
+  <button class="tab" onclick="showTab(5)">Escalada</button>
+  <button class="tab" onclick="showTab(6)">Especiales</button>
+  <button class="tab" onclick="showTab(7)">Cierre</button>
+</div>
+
+<!-- ═══════════════ TAB 0: MALETÍN ═══════════════ -->
+<div class="sec act" id="s0">
+
+  <div class="roadmap">
+    <div class="roadmap-title">⚡ Hoja de ruta — qué harás en esta visita</div>
+    <p style="font-size:11px;color:var(--it);margin-bottom:.6rem;opacity:.85">Pulsa en cada paso para ir directamente a esa sección.</p>
+    <div class="rm-steps">
+      <div class="rm-step rm-step-link" onclick="showTab(1)">
+        <div class="rm-num">1</div>
+        <div class="rm-text"><strong>Coloca la palomilla SC</strong> en región infraclavicular o cara externa del brazo<span class="rm-arrow"> → Acceso SC</span></div>
+      </div>
+      <div class="rm-step rm-step-link" onclick="showTab(2)">
+        <div class="rm-num">2</div>
+        <div class="rm-text"><strong>Evalúa:</strong> opioides previos, Parkinson, función renal, síntoma predominante<span class="rm-arrow"> → Evaluación</span></div>
+      </div>
+      <div class="rm-step rm-step-key rm-step-link" onclick="showTab(3)">
+        <div class="rm-num">3</div>
+        <div class="rm-text"><span class="rm-key-label">★ PREPARA Y ADMINISTRA LA MEZCLA DE CARGA</span> (morfina + midazolam + haloperidol* SC). <strong>Esto lo haces tú antes de irte.</strong><span class="rm-arrow"> → Dosis Carga</span>
+        <div style="font-size:11px;color:var(--dt);margin-top:3px">*Haloperidol <strong>CONTRAINDICADO</strong> en Parkinson o demencia por Cuerpos de Lewy → sustituir por levomepromazina</div></div>
+      </div>
+      <div class="rm-step rm-step-key rm-step-link" onclick="showTab(4)">
+        <div class="rm-num">4</div>
+        <div class="rm-text"><span class="rm-key-label">★ PREPARA LAS JERINGAS DE RESCATE:</span> <strong>3 × "RESCATE MALESTAR" + 2 × "RUIDO PECHO"</strong>, rotuladas y con instrucciones escritas para la familia<span class="rm-arrow"> → Kit Familia</span></div>
+      </div>
+      <div class="rm-step rm-step-link" onclick="showTab(4)">
+        <div class="rm-num">5</div>
+        <div class="rm-text"><strong>Instruye a la familia</strong> en técnica SC y criterios de uso. Entrega hoja escrita con teléfono del PAC.<span class="rm-arrow"> → Kit Familia</span></div>
+      </div>
+      <div class="rm-step rm-step-link" onclick="showTab(7)">
+        <div class="rm-num">6</div>
+        <div class="rm-text"><strong>Anota en papel antes de salir</strong> los datos clave. Registra en Abucasis y activa interconsulta a paliativos/UHD al volver al PAC<span class="rm-arrow"> → Cierre</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="al al-r">
+    <span class="lbl">Antes de salir del PAC:</span>Verifica este inventario. Material calculado para 1 dosis de carga (tú) + 3 rescates confort + 2 rescates estertores + reserva de segunda línea.
+  </div>
+
+  <div class="card">
+    <div class="card-title">Fármacos — ampollas</div>
+    <div class="drow">
+      <div>
+        <div class="dname">Cloruro Mórfico 1%</div>
+        <div class="ddetail">10 mg / 1 ml · Dolor, disnea</div>
+      </div>
+      <div class="dqty">× 6</div>
+    </div>
+    <div class="drow">
+      <div>
+        <div class="dname">Midazolam</div>
+        <div class="ddetail">
+          <strong style="color:var(--st)">Concentración preferida: 15 mg/3 ml → 1 ml = 5 mg</strong><br>
+          Si solo hay 5 mg/5 ml → 1 ml = 1 mg (dosis ineficaz si cargas "1 ml como siempre")<br>
+          Si llevas ampolla 5 mg/5 ml: márcala con rotulador <strong>antes de salir</strong>.
+        </div>
+      </div>
+      <div class="dqty">× 5</div>
+    </div>
+    <div class="drow">
+      <div>
+        <div class="dname">Haloperidol</div>
+        <div class="ddetail">5 mg / 1 ml · Agitación, delirium, náuseas<br><span style="color:var(--dt);font-weight:600">CONTRAINDICADO en Parkinson / Lewy Body</span></div>
+      </div>
+      <div class="dqty">× 3</div>
+    </div>
+    <div class="drow">
+      <div>
+        <div class="dname">Levomepromazina (Sinogan)</div>
+        <div class="ddetail">25 mg / 1 ml · Segunda línea agitación refractaria · Alternativa al haloperidol en Parkinson</div>
+      </div>
+      <div class="dqty">× 2</div>
+    </div>
+    <div class="drow">
+      <div>
+        <div class="dname">Butilbromuro de Escopolamina (Buscapina)</div>
+        <div class="ddetail">20 mg / 1 ml · Estertores</div>
+      </div>
+      <div class="dqty">× 3</div>
+    </div>
+    <div class="drow">
+      <div>
+        <div class="dname">Suero Fisiológico 0,9%</div>
+        <div class="ddetail">Ampollas 5 ml · Dilución y lavado de palomilla</div>
+      </div>
+      <div class="dqty">× 10</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Material técnico</div>
+    <div class="drow"><div><div class="dname">Palomillas de seguridad 23G o 25G</div></div><div class="dqty">× 2</div></div>
+    <div class="drow"><div><div class="dname">Apósitos transparentes (Tegaderm)</div></div><div class="dqty">× 3</div></div>
+    <div class="drow"><div><div class="dname">Jeringas de 5 ml</div><div class="ddetail">Volumen óptimo para control SC</div></div><div class="dqty">× 12</div></div>
+    <div class="drow"><div><div class="dname">Agujas de carga, gasas, alcohol</div></div><div class="dqty">Generoso</div></div>
+    <div class="drow"><div><div class="dname">Rotulador permanente</div><div class="ddetail">Para etiquetar jeringas de rescate y marcar concentración de midazolam si es necesario</div></div><div class="dqty">× 1</div></div>
+    <div class="drow"><div><div class="dname">Papel + bolígrafo</div><div class="ddetail">Instrucciones escritas para la familia — imprescindible</div></div><div class="dqty">Sí</div></div>
+  </div>
+
+  <div class="al al-a">
+    <span class="lbl">Error de concentración — el más frecuente con midazolam:</span>
+    Si la ampolla es 5 mg/5 ml y cargas "1 ml como siempre", estás poniendo <strong>1 mg en vez de 5 mg</strong>. Dosis ineficaz. Estandariza siempre la misma presentación y comprueba la ampolla antes de cargar.
+  </div>
+</div>
+
+<!-- ═══════════════ TAB 1: ACCESO SC ═══════════════ -->
+<div class="sec" id="s1">
+  <div class="card">
+    <div class="card-title">Localización de la palomilla</div>
+    <div class="step">
+      <div class="snum">1</div>
+      <div>
+        <div class="stitle">Zona preferente</div>
+        <div class="sdesc">Región infraclavicular o cara externa del brazo. Zonas cómodas para la familia al administrar rescates y con absorción predecible.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="snum">2</div>
+      <div>
+        <div class="stitle">Paciente caquéctico o muy delgado</div>
+        <div class="sdesc">Usa el abdomen, a 4–5 cm del ombligo. El tejido subcutáneo abdominal es más predecible incluso en la emaciación severa. Evita las extremidades inferiores si hay edemas.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="snum">3</div>
+      <div>
+        <div class="stitle">Técnica de inserción</div>
+        <div class="sdesc">Bisel hacia arriba, ángulo de 45°. Fija con apósito transparente. Confirma ausencia de sangre en el tubo (descartar punción vascular accidental).</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="snum">4</div>
+      <div>
+        <div class="stitle">Posición del paciente</div>
+        <div class="sdesc">Decúbito lateral (posición de seguridad). Favorece el drenaje gravitacional de secreciones y reduce el riesgo de aspiración. Explícalo a la familia y pídeles que lo mantengan así.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card-a">
+    <div class="card-title ct-a">El "espacio muerto" — error silencioso frecuente</div>
+    <p class="prose">La palomilla retiene aproximadamente <strong>0,5 ml</strong> en su tubo. Si inyectas el fármaco sin lavar después, el medicamento no llega al paciente — se queda en el plástico.</p>
+    <div class="al al-a" style="margin-bottom:0">
+      <span class="lbl">Regla fija:</span>Lava siempre con <strong>1 ml de SF</strong> tras cada dosis, sin excepción.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Límites de volumen SC — no son negociables</div>
+    <table class="dtbl">
+      <tr><th>Situación</th><th>Volumen máximo por bolo</th></tr>
+      <tr><td>Paciente con tejido SC normal</td><td class="tb tg">2,5 ml (ideal)</td></tr>
+      <tr><td>Límite absoluto en cualquier paciente</td><td class="tb ta">3 ml</td></tr>
+      <tr><td>Paciente caquéctico o con edema local</td><td class="tb tr2">2 ml máximo</td></tr>
+    </table>
+    <p class="prose" style="margin-top:.75rem">El tejido SC no es una vena. Un volumen excesivo causa edema doloroso y absorción errática. Trabaja con los fármacos concentrados, no diluyas para llegar a volúmenes grandes.</p>
+  </div>
+</div>
+
+<!-- ═══════════════ TAB 2: EVALUACIÓN ═══════════════ -->
+<div class="sec" id="s2">
+  <div class="al al-r">
+    <span class="lbl">Este paso lo cambia todo:</span>Antes de preparar ninguna jeringa, determina si el paciente es <strong>opioide-tolerante</strong> y cuál es el síntoma predominante. Un opioide-tolerante con parche de fentanilo 50 al que le das 5 mg de morfina SC recibe una dosis subterapéutica irrelevante.
+  </div>
+
+  <div class="card">
+    <div class="card-title">4 preguntas al llegar</div>
+    <div class="step">
+      <div class="snum">1</div>
+      <div>
+        <div class="stitle">¿Lleva parche de fentanilo o tomaba opioides orales?</div>
+        <div class="sdesc">Si sí: anota la dosis y <strong>deja el parche puesto</strong>. El parche sigue cubriendo la analgesia basal incluso en agonía; los rescates se añaden encima, no lo sustituyen. Usa la tabla de conversión de abajo para calcular el rescate correcto.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="snum">2</div>
+      <div>
+        <div class="stitle">¿Tiene Parkinson o demencia con Cuerpos de Lewy?</div>
+        <div class="sdesc">Si sí: <strong>nunca haloperidol</strong>. Puede precipitar crisis de rigidez severa o síndrome neuroléptico maligno. Usa levomepromazina en su lugar para la agitación.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="snum">3</div>
+      <div>
+        <div class="stitle">¿Cómo está la función renal?</div>
+        <div class="sdesc">Oliguria, edemas generalizados, creatinina alta conocida: reduce morfina un 25–50% y alarga el intervalo de rescate a mínimo 4 horas. La morfina-6-glucurónido (metabolito activo) se acumula en IR.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="snum">4</div>
+      <div>
+        <div class="stitle">¿Cuál es el síntoma que más le hace sufrir ahora?</div>
+        <div class="sdesc">Esto guía la composición de las jeringas. Ver tabla de síntomas abajo.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Tabla de conversión rápida — dosis de rescate SC</div>
+    <p class="prose" style="margin-bottom:.5rem">
+      <strong>Fórmula:</strong> Rescate SC (mg) = MCE₂₄h ÷ 12<br>
+      <span style="font-size:12px;color:var(--t3)">(MCE₂₄h = Morfina equivalente oral total en 24 h. Se divide entre 6 para obtener la dosis de rescate oral, y entre 2 para convertir oral a SC. Factor de conversión oral:SC utilizado = 2:1.)</span>
+    </p>
+    <div class="al al-a" style="margin-bottom:.75rem">
+      <span class="lbl">Parche de fentanilo:</span>Déjalo puesto. Sigue cubriendo la analgesia basal. Calcula el rescate SC sobre la dosis equivalente del parche y añádelo encima de esa cobertura.
+    </div>
+    <table class="dtbl">
+      <tr><th>Opioide previo</th><th>Dosis/24 h</th><th>Equiv. morfina oral</th><th>Rescate SC</th></tr>
+      <tr><td>Sin opioides previos</td><td>—</td><td>—</td><td class="tg tb">2,5–5 mg</td></tr>
+      <tr><td>Fentanilo parche</td><td>12 mcg/h</td><td>~30 mg oral</td><td class="tg tb">2,5 mg</td></tr>
+      <tr><td>Fentanilo parche</td><td>25 mcg/h</td><td>~60 mg oral</td><td class="tg tb">5 mg</td></tr>
+      <tr><td>Fentanilo parche</td><td>50 mcg/h</td><td>~120 mg oral</td><td class="ta tb">10 mg</td></tr>
+      <tr><td>Fentanilo parche</td><td>75 mcg/h</td><td>~180 mg oral</td><td class="ta tb">15 mg</td></tr>
+      <tr><td>Fentanilo parche</td><td>100 mcg/h</td><td>~240 mg oral</td><td class="tr2 tb">20 mg</td></tr>
+      <tr><td>Morfina oral (MST)</td><td>30 mg/24 h</td><td>30 mg oral</td><td class="tg tb">2,5 mg</td></tr>
+      <tr><td>Morfina oral (MST)</td><td>60 mg/24 h</td><td>60 mg oral</td><td class="tg tb">5 mg</td></tr>
+      <tr><td>Morfina oral (MST)</td><td>90 mg/24 h</td><td>90 mg oral</td><td class="ta tb">7,5 mg</td></tr>
+      <tr><td>Oxicodona oral</td><td>20 mg/24 h</td><td>~30 mg oral</td><td class="tg tb">2,5 mg</td></tr>
+      <tr><td>Tramadol oral †</td><td>300 mg/24 h</td><td>~30 mg oral</td><td class="tg tb">2,5 mg</td></tr>
+    </table>
+    <p class="note" style="margin-top:.6rem">† <strong>Tramadol + IR:</strong> El tramadol está contraindicado en IR moderada-grave (ClCr &lt;30 ml/min). Si el paciente venía con tramadol y tiene datos de IR (oliguria, creatinina elevada), no uses la equivalencia del tramadol: trata como paciente sin opioides previos y empieza con morfina en dosis reducidas (2,5 mg). El tramadol acumula metabolitos activos en IR con riesgo de convulsiones.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Evaluación del sufrimiento en el paciente no verbal</div>
+    <p class="prose">En agonía, el paciente suele estar inconsciente o semiconsciente. Evalúa mediante signos conductuales:</p>
+    <table class="dtbl">
+      <tr><th>Signo</th><th>Sugiere</th></tr>
+      <tr><td>Fruncir el ceño, muecas, gemidos</td><td>Dolor o disnea activa</td></tr>
+      <tr><td>Inquietud motora, intentos de levantarse, vocalización repetitiva</td><td>Delirium hiperactivo / agitación terminal</td></tr>
+      <tr><td>Taquicardia, diaforesis, taquipnea</td><td>Sufrimiento no controlado</td></tr>
+      <tr><td>Respiración ruidosa sin otros signos de angustia</td><td>Estertores — no confundir con disnea</td></tr>
+      <tr><td>Paciente quieto, respiración lenta, sin muecas</td><td>Bien controlado — no tratar sin síntoma</td></tr>
+    </table>
+  </div>
+
+  <div class="card card-a">
+    <div class="card-title ct-a">Diagnóstico diferencial de la agitación terminal — antes de sedar</div>
+    <p class="prose">La agitación refractaria a la medicación a veces tiene causa tratable. Comprueba brevemente antes de escalar dosis:</p>
+    <table class="dtbl">
+      <tr><th>Causa</th><th>Cómo detectarla</th><th>Acción</th></tr>
+      <tr><td class="tb">Retención urinaria</td><td>Globo vesical palpable, inquietud sin motivo claro</td><td>Sondaje vesical — mejora espectacular en minutos</td></tr>
+      <tr><td class="tb">Fecaloma</td><td>Último ritmo intestinal desconocido, abdomen distendido</td><td>Enema si está en condiciones; si no, prioritiza sedación</td></tr>
+      <tr><td class="tb">Dolor no controlado</td><td>Muecas, postura antiálgica</td><td>Aumentar morfina</td></tr>
+      <tr><td class="tb">Disnea</td><td>Taquipnea, uso de musculatura accesoria</td><td>Morfina + decúbito lateral + ventilación facial</td></tr>
+      <tr><td class="tb">Efecto paradójico del midazolam</td><td>Agitación que empeora tras dosis de midazolam</td><td>Suspender midazolam. Cambiar a levomepromazina</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════ TAB 3: DOSIS DE CARGA ═══════════════ -->
+<div class="sec" id="s3">
+  <p class="sec-intro">Tu objetivo es <strong>resetear el sufrimiento</strong> antes de irte. Esta dosis la administras tú. Los rescates los dejará preparados la familia según tus instrucciones.</p>
+
+  <div class="al al-r">
+    <span class="lbl">Parkinson / Lewy Body:</span>Omite el haloperidol de todas las jeringas. Usa morfina + midazolam. Si la agitación es intensa, añade levomepromazina 6,25 mg (0,25 ml) en lugar del haloperidol.
+  </div>
+
+  <div class="al al-b">
+    <span class="lbl">Paciente con parche de fentanilo:</span>Deja el parche en su sitio. El parche sigue activo y cubre la analgesia basal. Calcula la morfina SC de carga según la tabla de Evaluación y adminístrala como rescate sobre esa base opioide.
+  </div>
+
+  <div class="card card-g">
+    <div class="card-title ct-g">Mezcla de carga — paciente sin opioides previos</div>
+    <table class="mtbl">
+      <tr><td class="mdrug">Morfina 1%</td><td class="mvol">0,5 ml</td><td class="mdose">5 mg · dolor + disnea</td></tr>
+      <tr><td class="mdrug">Midazolam*</td><td class="mvol">1 ml</td><td class="mdose">5 mg · ansiolisis + sedación leve</td></tr>
+      <tr><td class="mdrug">Haloperidol</td><td class="mvol">0,5 ml</td><td class="mdose">2,5 mg · antidelirante + antiemético</td></tr>
+      <tr><td class="mdrug">SF</td><td class="mvol">0,5 ml</td><td class="mdose">completar volumen</td></tr>
+    </table>
+    <div class="mtotal">
+      <span class="mtlabel">Total en jeringa</span>
+      <span class="mtval">2,5 ml + lavar con 1 ml SF</span>
+    </div>
+    <p class="note">*Ampolla 15 mg/3 ml → 1 ml = 5 mg. Si tienes ampolla 5 mg/5 ml → necesitas 5 ml para 5 mg: ponlo en jeringa separada y ajusta el SF.</p>
+  </div>
+
+  <div class="card card-a">
+    <div class="card-title ct-a">Paciente opioide-tolerante — ajusta solo la morfina</div>
+    <p class="prose">Usa la tabla de la pestaña <strong>Evaluación</strong>. <strong>Midazolam y haloperidol no cambian</strong> con la tolerancia a opioides.</p>
+    <div class="al al-a" style="margin-bottom:0;margin-top:.5rem">
+      <span class="lbl">Volumen &gt;3 ml:</span>Si la dosis de morfina calculada supera los 3 ml de volumen total, el tejido SC no puede absorber ese bolo de forma segura en un solo punto. Coloca una segunda palomilla en un sitio distinto y administra la morfina por una y el midazolam + haloperidol por la otra. Nunca inyectes más de 3 ml en el mismo punto aunque sean jeringas separadas.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Por qué la mezcla de carga tiene sentido clínico</div>
+    <table class="dtbl">
+      <tr><th>Fármaco</th><th>Rol primario</th><th>Rol secundario</th></tr>
+      <tr><td class="tb">Morfina</td><td>Analgesia, disnea</td><td>Reduce la sensación de ahogo</td></tr>
+      <tr><td class="tb">Midazolam</td><td>Ansiolisis, sedación proporcional</td><td>Anticonvulsivante, amnesia</td></tr>
+      <tr><td class="tb">Haloperidol</td><td>Antidelirante, calma agitación sin suprimir conciencia</td><td>Antiemético (útil en agonía con náuseas)</td></tr>
+    </table>
+    <div class="al al-g" style="margin-top:.75rem;margin-bottom:0">
+      <span class="lbl">Compatibilidad:</span>Los tres son compatibles en la misma jeringa a estas concentraciones. No precipitan. Una sola inyección es mejor que tres bolos que estresan el tejido.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ TAB 4: KIT FAMILIA ═══════════════ -->
+<div class="sec" id="s4">
+  <div class="al al-b">
+    <span class="lbl">Objetivo:</span>Que no tengas que volver a las 3 AM. Antes de irte, deja preparadas, rotuladas y con instrucciones escritas <strong>todas las jeringas</strong>. La familia solo tiene que leer la etiqueta y actuar.
+  </div>
+
+  <div class="al al-r">
+    <span class="lbl">Parkinson / Lewy Body:</span>Omite el haloperidol en todas las jeringas de rescate. Preparas morfina + midazolam (± levomepromazina si hay agitación marcada). Márcalo en la etiqueta.
+  </div>
+
+  <div class="card card-g">
+    <div class="card-title ct-g">Jeringas "RESCATE MALESTAR" — prepara 3</div>
+    <p class="prose" style="margin-bottom:.75rem">Para dolor, disnea o agitación. Misma composición que la dosis de carga, ajustada al paciente que has evaluado.</p>
+    <table class="mtbl">
+      <tr><td class="mdrug">Morfina 1%</td><td class="mvol">según tabla</td><td class="mdose">habitualmente 0,5 ml (5 mg)</td></tr>
+      <tr><td class="mdrug">Midazolam</td><td class="mvol">1 ml</td><td class="mdose">5 mg (ampolla 15 mg/3 ml)</td></tr>
+      <tr><td class="mdrug">Haloperidol</td><td class="mvol">0,5 ml</td><td class="mdose">2,5 mg · omitir en Parkinson/LBD</td></tr>
+      <tr><td class="mdrug">SF</td><td class="mvol">0,5 ml</td><td class="mdose">completar</td></tr>
+    </table>
+    <div class="mtotal"><span class="mtlabel">Total</span><span class="mtval">2,5 ml + 1 ml SF lavado</span></div>
+    <div class="divider"></div>
+    <p class="prose"><strong>Etiqueta:</strong> "RESCATE MALESTAR" en letras grandes.<br>
+    <strong>Cuándo ponerlo:</strong> Si el paciente se queja, se agita, respira mal o muestra sufrimiento visible.<br>
+    <strong>Repetición:</strong> Se puede repetir a los 20–30 min si no hay mejoría. Máximo cada 2 horas.<br>
+    <strong>Si no mejora tras 2 rescates seguidos:</strong> Llamar al PAC.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Jeringas "RUIDO PECHO" — prepara 2</div>
+    <p class="prose" style="margin-bottom:.75rem">Solo para el gorgoteo de secreciones. No contiene sedante. No la uses si el paciente no tiene ese ruido concreto.</p>
+    <table class="mtbl">
+      <tr><td class="mdrug">Buscapina</td><td class="mvol">1 ml</td><td class="mdose">20 mg (1 ampolla entera)</td></tr>
+      <tr><td class="mdrug">SF</td><td class="mvol">1 ml</td><td class="mdose">dilución mínima</td></tr>
+    </table>
+    <div class="mtotal"><span class="mtlabel">Total</span><span class="mtval">2 ml + 1 ml SF lavado</span></div>
+    <div class="divider"></div>
+    <p class="prose"><strong>Etiqueta:</strong> "RUIDO PECHO" en letras grandes.<br>
+    <strong>Cuándo ponerlo:</strong> Solo si aparece el gorgoteo característico al respirar.<br>
+    <strong>Repetición:</strong> Máximo cada 6–8 horas. Más eficaz si se pone precozmente, antes de que las secreciones sean abundantes.</p>
+    <div class="al al-b" style="margin-top:.5rem;margin-bottom:0">
+      <span class="lbl">Lo que hay que explicar a la familia:</span>"Ese ruido no le duele. No se está ahogando. Está muy dormido y no puede tragar las secreciones normales. Esta inyección reduce su producción, pero no siempre lo elimina del todo. El ruido os angustia más a vosotros que a él."
+    </div>
+  </div>
+
+  <div class="card card-a">
+    <div class="card-title ct-a">Hoja de instrucciones escritas — no te vayas sin darla</div>
+    <p class="prose" style="margin-bottom:.5rem">Entrega a la familia el siguiente texto (escrito a mano o impreso):</p>
+    <div class="cblock">"Si a los 20 minutos de poner la jeringa etiquetada como <strong>"RESCATE MALESTAR"</strong> el paciente sigue igual de incómodo, pueden poner otro. El máximo es uno cada 2 horas. Si tras dos rescates seguidos no mejora, llamad al PAC: <em>[Teléfono del PAC]</em>.
+
+La jeringa etiquetada como <strong>"RUIDO PECHO"</strong> solo se pone si aparece el gorgoteo al respirar. Ese ruido no le produce sufrimiento a él.
+
+Si el paciente está tranquilo y sin sufrimiento visible — no pongas nada. Dejarle descansar es lo mejor.
+
+Mantenedlo de lado (posición de seguridad).
+
+Puedes mojarle los labios con una gasa húmeda."</div>
+  </div>
+
+  <div class="card card-b">
+    <div class="card-title ct-b">Registro legal — imprescindible (anota ahora, registra al volver al PAC)</div>
+    <p class="prose"><strong>Antes de irte del domicilio:</strong> anota en papel o en el móvil los datos clave (fármacos, dosis, jeringas entregadas, nombre del cuidador instruido). Al volver al PAC, registra en Abucasis. La administración de rescates SC por un familiar bajo instrucción directa del médico es una práctica habitual en paliativos domiciliarios pero requiere cobertura documental explícita.</p>
+    <table class="dtbl">
+      <tr><th>Qué registrar</th><th>Ejemplo</th></tr>
+      <tr><td class="tb">Fármaco y dosis de cada jeringa entregada</td><td>"3 jeringas RESCATE: morfina 5 mg + midazolam 5 mg + haloperidol 2,5 mg SC. 2 jeringas RUIDO: Buscapina 20 mg SC."</td></tr>
+      <tr><td class="tb">Nombre del cuidador instruido</td><td>"Se instruye a [nombre], [parentesco], en técnica de administración SC mediante palomilla y lavado posterior con SF."</td></tr>
+      <tr><td class="tb">Comprensión verificada</td><td>"El cuidador demuestra comprensión de las instrucciones y de los criterios de uso de cada jeringa."</td></tr>
+      <tr><td class="tb">Teléfono de contacto registrado</td><td>"Tel. familia: [número]. Se facilita número del PAC para consultas nocturnas."</td></tr>
+    </table>
+    <div class="al al-b" style="margin-top:.75rem;margin-bottom:0">
+      <span class="lbl">Nota:</span>Este registro no es burocracia — es la cobertura legal del facultativo. El bloque de texto completo está disponible en la pestaña Cierre.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Cuidados básicos — instrucciones para la familia</div>
+    <div class="step">
+      <div class="snum" style="background:var(--st);color:#fff">+</div>
+      <div>
+        <div class="stitle">Posición lateral</div>
+        <div class="sdesc">Mantener al paciente en decúbito lateral. Reduce el riesgo de aspiración y el ruido de secreciones.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="snum" style="background:var(--st);color:#fff">+</div>
+      <div>
+        <div class="stitle">Higiene oral</div>
+        <div class="sdesc">Mojar los labios y boca con una gasa o bastoncillo húmedo cada 1–2 horas. El paciente no puede tragar, pero la boca seca es incómoda incluso en agonía.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="snum" style="background:var(--st);color:#fff">+</div>
+      <div>
+        <div class="stitle">Ambiente</div>
+        <div class="sdesc">Luz tenue, voz tranquila. El oído es el último sentido en desaparecer. El paciente puede estar escuchando aunque parezca inconsciente.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="snum" style="background:var(--st);color:#fff">+</div>
+      <div>
+        <div class="stitle">No forzar alimentación ni hidratación</div>
+        <div class="sdesc">En agonía, el organismo ya no utiliza los nutrientes. Forzar líquidos puede aumentar las secreciones y los estertores. Explicárselo a la familia reduce la culpa.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ TAB 5: ESCALADA ═══════════════ -->
+<div class="sec" id="s5">
+  <div class="al al-r">
+    <span class="lbl">Cuándo activar:</span>Sufrimiento evidente 30–40 minutos tras la dosis de carga. <strong>No te vayas de la casa sin que el síntoma esté controlado o hayas escalado.</strong>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Algoritmo de escalada paso a paso</div>
+    <div class="esc">
+      <div class="enum">1</div>
+      <div>
+        <div class="etitle">Dosis de carga insuficiente (30 min sin control)</div>
+        <div class="edesc">Repite el bolo completo. Si el paciente era opioide-tolerante y no subiste suficiente la morfina en la primera dosis, ahora es el momento de corregirlo. Sube morfina un 50% respecto a la dosis anterior. Midazolam y haloperidol sin cambio.</div>
+      </div>
+    </div>
+    <div class="esc">
+      <div class="enum">2</div>
+      <div>
+        <div class="etitle">Agitación refractaria que no cede con midazolam</div>
+        <div class="edesc">Añade <strong>Levomepromazina 6,25–12,5 mg SC</strong> (0,25–0,5 ml de la ampolla 25 mg/ml). Es tu herramienta para el delirium hiperactivo refractario. Funciona sinérgicamente con el midazolam. Compatible en la misma jeringa si el volumen lo permite (&lt;3 ml total). Efecto hipotensor — precaución en ya hipotensos.</div>
+      </div>
+    </div>
+    <div class="esc">
+      <div class="enum">3</div>
+      <div>
+        <div class="etitle">Efecto paradójico del midazolam sospechado</div>
+        <div class="edesc">Raro pero real, especialmente en ancianos con deterioro cognitivo previo. Si la agitación empeora o aparece tras la dosis de midazolam: suspende midazolam. Sustituye por levomepromazina como única benzodiacepina de escalada disponible.</div>
+      </div>
+    </div>
+    <div class="esc">
+      <div class="enum">4</div>
+      <div>
+        <div class="etitle">Sufrimiento refractario a todo lo anterior</div>
+        <div class="edesc">Sedación paliativa proporcional con incremento progresivo: midazolam en bolos repetidos cada 15–20 min hasta alcanzar confort o somnolencia adecuada. Documenta en la historia que el sufrimiento es refractario e irreversible. Informa a la familia de que el objetivo es exclusivamente el alivio del sufrimiento. Activa paliativos/UHD para la mañana.</div>
+      </div>
+    </div>
+    <div class="esc">
+      <div class="enum">5</div>
+      <div>
+        <div class="etitle">Situación que supera los recursos del PAC</div>
+        <div class="edesc">Llama al coordinador médico. Si existe UHD nocturna en tu área, actívala. En último recurso, el traslado hospitalario puede ser necesario para instalar bomba de infusión. No dejes a la familia sola ante sufrimiento incontrolable.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Levomepromazina — referencia rápida</div>
+    <table class="dtbl">
+      <tr><th>Indicación</th><th>Dosis SC</th><th>Volumen</th><th>Intervalo</th></tr>
+      <tr><td>Agitación 2ª línea</td><td class="tg tb">6,25 mg</td><td>0,25 ml</td><td>Cada 4–6 h</td></tr>
+      <tr><td>Agitación intensa</td><td class="ta tb">12,5 mg</td><td>0,5 ml</td><td>Cada 4–6 h</td></tr>
+      <tr><td>Alternativa a haloperidol en Parkinson</td><td class="tg tb">6,25–12,5 mg</td><td>0,25–0,5 ml</td><td>Cada 4–6 h</td></tr>
+      <tr><td>Sedación paliativa refractaria</td><td class="tr2 tb">25 mg</td><td>1 ml</td><td>Individualizar</td></tr>
+    </table>
+    <div class="al al-a" style="margin-top:.75rem;margin-bottom:0">
+      <span class="lbl">Advertencia:</span>La levomepromazina tiene efecto hipotensor marcado. En pacientes ya hipotensos, empieza siempre con 6,25 mg y espera 20 min antes de repetir.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ TAB 6: ESPECIALES ═══════════════ -->
+<div class="sec" id="s6">
+  <div class="card card-r">
+    <div class="card-title ct-r">Parkinson y demencia con Cuerpos de Lewy — contraindicación absoluta</div>
+    <p class="prose">El haloperidol y otros neurolépticos típicos (y muchos atípicos) están <strong>contraindicados</strong> en estas patologías. Pueden provocar crisis de rigidez severa, crisis autonómicas o síndrome neuroléptico maligno.</p>
+    <table class="dtbl">
+      <tr><th>En lugar de haloperidol</th><th>Dosis</th><th>Comentario</th></tr>
+      <tr><td class="tb">Levomepromazina</td><td>6,25–12,5 mg SC</td><td>Primera línea de agitación en Parkinson</td></tr>
+      <tr><td class="tb">Midazolam solo (dosis más alta)</td><td>7,5–10 mg SC</td><td>Si no hay levomepromazina disponible</td></tr>
+    </table>
+  </div>
+
+  <div class="card card-r">
+    <div class="card-title ct-r">Insuficiencia renal — muy prevalente en agonía oncológica</div>
+    <p class="prose">La morfina-6-glucurónido (metabolito activo) se acumula. Riesgo de depresión respiratoria, sedación excesiva y mioclonías.</p>
+    <table class="dtbl">
+      <tr><th>Señal clínica</th><th>Acción</th></tr>
+      <tr><td>Oliguria / anuria &gt;12 h</td><td>Reduce morfina 25–50%. Alarga intervalo a ≥4 h</td></tr>
+      <tr><td>Creatinina elevada conocida</td><td>Reduce morfina 25–50%</td></tr>
+      <tr><td>Edemas generalizados</td><td>Sospecha IR. Empieza en dosis bajas</td></tr>
+      <tr><td>Mioclonías tras morfina</td><td class="tr2 tb">Discontinúa morfina. Plantea oxicodona SC si tienes. No siempre disponible en PAC.</td></tr>
+    </table>
+    <div class="al al-b" style="margin-top:.75rem;margin-bottom:0">
+      <span class="lbl">Alternativa en IR grave:</span>La oxicodona SC tiene metabolismo más seguro en IR moderada-grave. Si está disponible en tu PAC, es la alternativa de elección al detectar mioclonías con morfina.
+    </div>
+  </div>
+
+  <div class="card card-a">
+    <div class="card-title ct-a">EPOC / Insuficiencia respiratoria avanzada</div>
+    <p class="prose">La morfina a dosis paliativas es <strong>segura</strong> en EPOC avanzado. No acelera la muerte; reduce la sensación de ahogo. El midazolam requiere más precaución en hipercapnicos.</p>
+    <table class="dtbl">
+      <tr><th>Situación</th><th>Morfina SC</th><th>Midazolam SC</th></tr>
+      <tr><td>EPOC sin hipercapnia conocida</td><td class="tg">Normal</td><td class="tg">Normal</td></tr>
+      <tr><td>EPOC con hipercapnia documentada</td><td class="tg">Normal</td><td class="ta">Empieza en 2,5 mg</td></tr>
+      <tr><td>Insuficiencia respiratoria aguda sobre crónica</td><td class="tg">Normal</td><td class="tr2">Precaución extrema — titula lento</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Hepatopatía grave</div>
+    <p class="prose">El midazolam se metaboliza en hígado. En hepatopatía grave el efecto es más prolongado e intenso de lo esperado. <strong>Empieza en 2,5 mg y titula lentamente.</strong> La morfina también tiene metabolismo hepático parcial, aunque es más predecible.</p>
+  </div>
+
+  <div class="card card-r">
+    <div class="card-title ct-r">Crisis convulsiva en agonía</div>
+    <p class="prose">Frecuente en tumores del SNC, metástasis cerebrales, encefalitis paraneoplásica o agonía en paciente epiléptico. El midazolam SC es el anticonvulsivante de elección cuando no hay vía IV.</p>
+    <table class="dtbl">
+      <tr><th>Situación</th><th>Dosis midazolam SC</th><th>Alternativa</th></tr>
+      <tr><td>Crisis activa (primero o segundo episodio)</td><td class="tr2 tb">10 mg SC o bucal</td><td>5 mg si anciano/frágil. Repetir a los 10 min si no cede.</td></tr>
+      <tr><td>Estado epiléptico refractario</td><td class="tr2 tb">10 mg + repetir cada 15 min</td><td>Llama al coordinador. Plantea traslado si no cede.</td></tr>
+      <tr><td>Profilaxis tras primera crisis en tumor cerebral</td><td class="ta tb">5 mg SC cada 8–12 h</td><td>Registra en historia y activa paliativos para la mañana.</td></tr>
+    </table>
+    <div class="al al-r" style="margin-top:.75rem;margin-bottom:0">
+      <span class="lbl">Importante:</span>En paciente con crisis convulsivas activas, la dosis de midazolam de rescate anticonvulsivo puede ser mayor que la sedante habitual. No confundas el tratamiento anticonvulsivo con la sedación paliativa: son objetivos distintos que pueden requerir dosis similares pero con indicaciones diferentes.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ TAB 7: CIERRE ═══════════════ -->
+<div class="sec" id="s7">
+  <div class="al al-b">
+    <span class="lbl">Marco ético:</span>La sedación paliativa proporcional tiene como objetivo exclusivo el alivio del sufrimiento. Es éticamente y legalmente correcta cuando el sufrimiento es refractario e irreversible. No acorta la vida. No es eutanasia.
+  </div>
+
+  <div class="card">
+    <div class="card-title">Nota clínica en la historia — bloques de texto sugeridos</div>
+    <div class="litem">
+      <div class="llabel">Situación clínica</div>
+      <div class="cblock">"Paciente en situación de agonía activa (últimas horas). Pronóstico vital de horas. Se confirma con familia la situación clínica irreversible."</div>
+    </div>
+    <div class="litem">
+      <div class="llabel">Información y consentimiento</div>
+      <div class="cblock">"Se informa a [familiar referente] de los objetivos del tratamiento: alivio exclusivo del sufrimiento, sin intención de acelerar el fallecimiento. La familia comprende la situación y consiente el inicio de sedación paliativa proporcional."</div>
+    </div>
+    <div class="litem">
+      <div class="llabel">Justificación técnica y plan</div>
+      <div class="cblock">"Por ausencia de bomba de infusión continua en el punto de guardia, se preparan jeringas de rescate SC para administración por la familia bajo instrucción directa. Dosis de carga administrada por el médico: [especificar fármacos y dosis]. Se dejan [N] jeringas de rescate preparadas y rotuladas. Se instruye a [nombre del cuidador principal] en técnica de administración SC mediante palomilla y lavado posterior con SF; el cuidador demuestra comprensión de las instrucciones y los criterios de uso de cada jeringa."</div>
+    </div>
+    <div class="litem">
+      <div class="llabel">Continuidad asistencial</div>
+      <div class="cblock">"Se activa interconsulta urgente a Unidad de Paliativos / UHD / Médico de Familia de referencia para valoración a primera hora del día [fecha]. Objetivo: instalar infusor elastomérico si el paciente sigue con vida. Tel. contacto familia: [número]."</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Activación de continuidad</div>
+    <div class="step">
+      <div class="snum">1</div>
+      <div>
+        <div class="stitle">Interconsulta a paliativos / UHD</div>
+        <div class="sdesc">Déjala cursada antes de irte. Indica la dosis de carga usada, el síntoma predominante y si quedan jeringas. El equipo matutino debe instalar elastómero si el paciente sigue con vida.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="snum">2</div>
+      <div>
+        <div class="stitle">Médico de familia de cabecera</div>
+        <div class="sdesc">Deja mensaje en la historia o avisa por los canales habituales. El médico de familia necesita saber que hay una situación de agonía activa domiciliaria con medicación SC en casa.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="snum">3</div>
+      <div>
+        <div class="stitle">Teléfono del PAC en la hoja escrita</div>
+        <div class="sdesc">La familia va a llamar. Que tengan el número escrito delante, no que intenten buscarlo a las 4 AM.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card-g">
+    <div class="card-title ct-g">Checklist de salida — marca antes de irte</div>
+    <button class="btn-reset" onclick="event.stopPropagation();resetChecklist()">↺ Resetear checklist</button>
+    <div class="chk"><div class="chk-box"></div><span class="chk-label">Dosis de carga administrada y paciente valorado como confortado</span><span class="chk-badge">Crítico</span></div>
+    <div class="chk"><div class="chk-box"></div><span class="chk-label">3 jeringas "RESCATE MALESTAR" preparadas y rotuladas</span><span class="chk-badge">Crítico</span></div>
+    <div class="chk"><div class="chk-box"></div><span class="chk-label">2 jeringas "RUIDO PECHO" preparadas y rotuladas</span><span class="chk-badge">Crítico</span></div>
+    <div class="chk"><div class="chk-box"></div><span class="chk-label">Parche de fentanilo verificado — dejarlo puesto si lo llevaba</span></div>
+    <div class="chk"><div class="chk-box"></div><span class="chk-label">Hoja de instrucciones escritas entregada a la familia (con teléfono del PAC escrito a mano)</span><span class="chk-badge">Crítico</span></div>
+    <div class="chk"><div class="chk-box"></div><span class="chk-label">Familia entrenada en cómo inyectar por la palomilla y lavar con SF</span></div>
+    <div class="chk"><div class="chk-box"></div><span class="chk-label">Paciente colocado en decúbito lateral y familia informada de mantenerlo así</span></div>
+    <div class="chk"><div class="chk-box"></div><span class="chk-label">Anotados en papel antes de salir: fármacos, dosis, jeringas, nombre del cuidador instruido</span><span class="chk-badge">Crítico</span></div>
+    <div class="chk"><div class="chk-box"></div><span class="chk-label">Al volver al PAC: registrar en Abucasis (situación, consentimiento, plan, jeringas, cuidador)</span><span class="chk-badge">Crítico</span></div>
+    <div class="chk"><div class="chk-box"></div><span class="chk-label">Interconsulta a UHD / paliativos cursada para la mañana</span></div>
+    <div class="chk"><div class="chk-box"></div><span class="chk-label">Recomendación de higiene oral e instrucciones de cuidados básicos dadas</span></div>
+  </div>
+
+</div><!-- /sec s7 -->
+</div><!-- /wrap -->
+
+<div class="footer">
+  <strong>Dr. Antonio Castro (Dpto. Salud Alicante)</strong> · <strong>v3.3</strong> (2026)
+  <p style="margin-top:5px; opacity:0.8;">
+    Herramienta de soporte clínico. No sustituye el juicio facultativo ni los protocolos oficiales de la Conselleria. Uso bajo responsabilidad del profesional.
+  </p>
+</div>
+
+<script>
+  /* ── PESTAÑAS ── función global, llamada desde onclick inline ── */
+  function showTab(i) {
+    var tabs = document.querySelectorAll('.tab');
+    var secs = document.querySelectorAll('.sec');
+    for (var j = 0; j < tabs.length; j++) {
+      tabs[j].className = j === i ? 'tab act' : 'tab';
+    }
+    for (var k = 0; k < secs.length; k++) {
+      secs[k].className = k === i ? 'sec act' : 'sec';
+    }
+    try { tabs[i].scrollIntoView({ block: 'nearest', inline: 'center' }); } catch(e) {}
+    try { window.scrollTo(0, 0); } catch(e) {}
+  }
+
+  /* ── TEMA ── función global, llamada desde onclick inline ── */
+  function toggleTheme() {
+    var html = document.documentElement;
+    var btn = document.getElementById('themeBtn');
+    var isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    if (btn) btn.textContent = isDark ? '🌙 Oscuro' : '☀️ Claro';
+  }
+
+  /* ── CHECKLIST ── función global ── */
+  function toggleChk(el) {
+    if (el.classList.contains('done')) {
+      el.classList.remove('done');
+    } else {
+      el.classList.add('done');
+    }
+  }
+
+  function resetChecklist() {
+    var chks = document.querySelectorAll('.chk');
+    for (var i = 0; i < chks.length; i++) {
+      chks[i].classList.remove('done');
+    }
+  }
+
+  /* ── Añadir onclick a los items del checklist al cargar ── */
+  window.onload = function() {
+    var chks = document.querySelectorAll('.chk');
+    for (var i = 0; i < chks.length; i++) {
+      chks[i].setAttribute('onclick', 'toggleChk(this)');
+    }
+  };
+</script>
+</body>
+</html>
